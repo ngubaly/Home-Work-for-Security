@@ -31,7 +31,7 @@ typedef struct {
 } CPU_State;
 
 void initialize_cpu(CPU_State *cpu);
-void load_factorial_program(CPU_State *cpu);
+void load_addition_program(CPU_State *cpu);
 void fetch_instruction(CPU_State *cpu, uint8_t *instruction);
 void execute_instruction(CPU_State *cpu, uint8_t instruction, bool *end_flag);
 
@@ -61,7 +61,7 @@ int main() {
 
     CPU_State cpu;
     initialize_cpu(&cpu);
-    load_factorial_program(&cpu);
+    load_addition_program(&cpu);
 
     bool end_flag = false;
     while (!end_flag) {
@@ -85,36 +85,15 @@ void initialize_cpu(CPU_State *cpu) {
     memset(cpu->program_ram, 0, RAM_SIZE);
 }
 
-void load_factorial_program(CPU_State *cpu) {
-    uint8_t factorial_program[] = {
-        0xD1, // Input into r1
-        0x51, // Immediate set r0 = 1
-        0x42, // Transfer r0 to r2
-        0x43, // Transfer r1 to r3
-        0xA3, // Compare r3 == 0
-        0x5E, // Immediate set r0 = 14
-        0xE0, // Conditional branch to r0 if zero
-        0x24, // Transfer r2 to r0
-        0x50, // Immediate set r0 = 0
-        0x42, // Transfer r0 to r2
-        0x4C, // Transfer r3 to r1
-        0xA1, // Compare r1 == 0
-        0x5F, // Immediate set r0 = 15
-        0xE0, // Conditional branch to r0 if zero
-        0x60, // Add r0 + r2 -> r0
-        0x42, // Transfer r0 to r2
-        0x51, // Immediate set r0 = 1
-        0x71, // Subtract r1 - r0 -> r1
-        0x5B, // Immediate set r0 = 11
-        0xF0, // Unconditional branch to r0
-        0x51, // Immediate set r0 = 1
-        0x73, // Subtract r3 - r0 -> r3
-        0x54, // Immediate set r0 = 4
-        0xF0, // Unconditional branch to r0
-        0xC2, // Output from r2
+void load_addition_program(CPU_State *cpu) {
+    uint8_t addition_program[] = {
+        0xD1, // Input into r1 (number 1)
+        0xD2, // Input into r2 (number 2)
+        0x61, // Add r1 + r2 -> r0
+        0xC0, // Output from r0 (result of addition)
         0xFF  // Invalid opcode to stop execution
     };
-    memcpy(cpu->program_rom, factorial_program, sizeof(factorial_program));
+    memcpy(cpu->program_rom, addition_program, sizeof(addition_program));
 }
 
 void fetch_instruction(CPU_State *cpu, uint8_t *instruction) {
@@ -276,7 +255,7 @@ void instr_output(CPU_State *cpu, uint8_t rx) {
 }
 
 void instr_input(CPU_State *cpu, uint8_t rx) {
-    uart_puts(UART_ID, "Enter a value (0-255): ");
+    uart_puts(UART_ID, "Enter a number (0-255): ");
     while (!uart_is_readable(UART_ID)) {
     }
     char input = uart_getc(UART_ID);
